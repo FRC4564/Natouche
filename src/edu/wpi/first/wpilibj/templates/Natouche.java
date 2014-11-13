@@ -8,10 +8,12 @@
 package edu.wpi.first.wpilibj.templates;
 
 
+//import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.SimpleRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Solenoid;
-import edu.wpi.first.wpilibj.Talon;
+//import edu.wpi.first.wpilibj.Jaguar;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -30,18 +32,23 @@ public class Natouche extends SimpleRobot {
     Joystick rightstick = new Joystick(2);
     
     //Solendoid declarations
-    Solenoid gearRight = new Solenoid(1);
-    Solenoid gearLeft = new Solenoid(2);
-    Solenoid dropRight = new Solenoid(3);
-    Solenoid dropLeft = new Solenoid(4);
+    Solenoid gearShiftUp = new Solenoid(1);
+    Solenoid gearShiftDown = new Solenoid(2);
+    Solenoid trampozine = new Solenoid(3);
     
-    //Drivetrain initiation
-    DriveTrain dt = new DriveTrain(Constants.frontLeft, Constants.rearLeft,
-                                   Constants.frontRight, Constants.rearRight);
+    //Drivetrain initiation~
+    DriveTrain dt = new DriveTrain(Constants.frontLeft, Constants.rearLeft, Constants.frontRight, Constants.rearRight);
+    
+    // This throtles speed between 0-100
+    private double speedControl = 1.0;
+    
+    //Trampozine
+    private boolean prevTrampozineButton = false;
+    private boolean trampozineState = false;  
     
     //Harvester motor declarations
-    Talon harvestRight = new Talon(Constants.PWM_HARVEST_RIGHT);
-    Talon harvestLeft = new Talon(Constants.PWM_HARVEST_LEFT);
+    //Talon harvestRight = new Talon(Constants.PWM_HARVEST_RIGHT);
+    //Talon harvestLeft = new Talon(Constants.PWM_HARVEST_LEFT);
     
     
     protected void robotInit() {
@@ -50,7 +57,24 @@ public class Natouche extends SimpleRobot {
     }
     
     public void autonomous() {
-        
+        gearShiftUp.set(true);
+        double time = Timer.getFPGATimestamp();
+        while (Timer.getFPGATimestamp() - time < 3) {
+            dt.arcadeDrive(-.9, 0);
+            if (Timer.getFPGATimestamp() - time > 0.5) {
+                trampozine.set(true);
+            }
+        }
+        time = Timer.getFPGATimestamp();
+        while (Timer.getFPGATimestamp() - time < 0.7) {
+            dt.arcadeDrive(0.6, 0);
+        }
+        time = Timer.getFPGATimestamp();
+        while (Timer.getFPGATimestamp() - time < 0.7) {
+            dt.arcadeDrive(-0.6, 0);
+        }
+        gearShiftUp.set(false);
+        dt.arcadeDrive(0, 0);
     }
 
     /**
@@ -60,7 +84,45 @@ public class Natouche extends SimpleRobot {
         System.out.println("Teleop...");
         dt.setSafetyEnabled(true);
         while (isOperatorControl() && isEnabled()) {
-            dt.tankDrive(leftstick, rightstick);
+            //Drive
+            if (leftstick.getRawButton(Constants.JB_SLOW_SPEED_ONE) ||
+                leftstick.getRawButton(Constants.JB_SLOW_SPEED_TWO))  {
+                speedControl = .8;
+            } else { 
+                speedControl = 1;   
+            }
+            dt.arcadeDrive(dt.accelCurve(leftstick)*speedControl,
+                leftstick.getX()*0.85*speedControl);
+            Timer.delay(Constants.TELEOP_LOOP_DELAY_SECS);
+            //Shift Up
+            if (leftstick.getRawButton(Constants.JB_SHIFT_UP)) {
+                gearShiftUp.set(true);
+            } else {
+                gearShiftUp.set(false);
+            }
+            //Shift Down
+            if (leftstick.getRawButton(Constants.JB_SHIFT_DOWN)) {
+                gearShiftDown.set(true);
+            } else {
+                gearShiftDown.set(false);
+            }
+            //Trampozine - 
+            if (leftstick.getRawButton(Constants.JB_TRAMPOZINE)) {
+                trampozine.set(false);
+            } else {
+                trampozine.set(true);
+            }
+                //if (prevTrampozineButton = false) {
+                //    prevTrampozineButton = true;             //button just got pressed
+                //    if (trampozineState = true) {            //cycle the trampozine
+                //        trampozineState = false;  
+                //    } else {
+                //        trampozineState = true;
+                //    }
+                //    trampozine.set(trampozineState);
+                //} else {
+                //    prevTrampozineButton = false;            //button just got released
+                //}
             
         }
     }
