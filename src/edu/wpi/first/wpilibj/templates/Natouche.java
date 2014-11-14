@@ -57,21 +57,21 @@ public class Natouche extends SimpleRobot {
     }
     
     public void autonomous() {
-        gearShiftUp.set(true);
+        gearShiftUp.set(false);
         double time = Timer.getFPGATimestamp();
         while (Timer.getFPGATimestamp() - time < 3) {
-            dt.arcadeDrive(-.9, 0);
+            dt.arcadeDrive(-.9, -.23);
             if (Timer.getFPGATimestamp() - time > 0.5) {
                 trampozine.set(true);
             }
         }
         time = Timer.getFPGATimestamp();
         while (Timer.getFPGATimestamp() - time < 0.7) {
-            dt.arcadeDrive(0.6, 0);
+            dt.arcadeDrive(0.6, -.23);
         }
         time = Timer.getFPGATimestamp();
         while (Timer.getFPGATimestamp() - time < 0.7) {
-            dt.arcadeDrive(-0.6, 0);
+            dt.arcadeDrive(-0.6, -.23);
         }
         gearShiftUp.set(false);
         dt.arcadeDrive(0, 0);
@@ -92,7 +92,7 @@ public class Natouche extends SimpleRobot {
                 speedControl = 1;   
             }
             dt.arcadeDrive(dt.accelCurve(leftstick)*speedControl,
-                leftstick.getX()*0.85*speedControl);
+                leftstick.getX()*1.0*speedControl);
             Timer.delay(Constants.TELEOP_LOOP_DELAY_SECS);
             //Shift Up
             if (leftstick.getRawButton(Constants.JB_SHIFT_UP)) {
@@ -108,9 +108,9 @@ public class Natouche extends SimpleRobot {
             }
             //Trampozine - 
             if (leftstick.getRawButton(Constants.JB_TRAMPOZINE)) {
-                trampozine.set(false);
-            } else {
                 trampozine.set(true);
+            } else {
+                trampozine.set(false);
             }
                 //if (prevTrampozineButton = false) {
                 //    prevTrampozineButton = true;             //button just got pressed
