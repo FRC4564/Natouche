@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.SimpleRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Solenoid;
+import edu.wpi.first.wpilibj.Gyro;
 //import edu.wpi.first.wpilibj.Jaguar;
 
 /**
@@ -39,6 +40,10 @@ public class Natouche extends SimpleRobot {
     //Drivetrain initiation~
     DriveTrain dt = new DriveTrain(Constants.frontLeft, Constants.rearLeft, Constants.frontRight, Constants.rearRight);
     
+    //Analog gyro
+    Gyro gyro = new Gyro(1);             // Gyro on Analog Channel 1
+
+    
     // This throtles speed between 0-100
     private double speedControl = 1.0;
     
@@ -54,6 +59,7 @@ public class Natouche extends SimpleRobot {
     protected void robotInit() {
         System.out.println("RobotInit...");
         dt.setMotorsInverted();
+        gyro.reset();
     }
     
     public void autonomous() {
@@ -91,8 +97,11 @@ public class Natouche extends SimpleRobot {
             } else { 
                 speedControl = 1;   
             }
+            double angle = gyro.getAngle(); // get current heading
             dt.arcadeDrive(dt.accelCurve(leftstick)*speedControl,
-                leftstick.getX()*1.0*speedControl);
+                angle/100);
+            //dt.arcadeDrive(dt.accelCurve(leftstick)*speedControl,
+            //    leftstick.getX()*0.85*speedControl);
             Timer.delay(Constants.TELEOP_LOOP_DELAY_SECS);
             //Shift Up
             if (leftstick.getRawButton(Constants.JB_SHIFT_UP)) {
